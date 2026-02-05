@@ -15,7 +15,7 @@
 
 ## Installation
 > **__Note:__**
-> This plugin requires additional Python packages. Please download and install the packages in [requirement.txt](https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS/blob/main/requirements.txt) 
+> This plugin requires additional Python packages. Please download and install the packages in [requirement.txt](https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin/blob/main/requirements.txt) 
  
 ### Installation of Prerequisites:
   
