@@ -37,7 +37,7 @@
   ### Restart QGIS
     
 ### Offline installation :
-  * Go to the [releases]() section of this repository, --> download the .zip file.
+  * Go to the [releases](https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin/releases/tag/QGIS_Plugin) section of this repository, --> download the .zip file.
   * Rename the downloaded zip file to build_short_evac_time.zip
   * Open QGIS --> Plugins --> Manage and Install Plugins... --> install from ZIP tab --> select the renamed zip --> install plugin (If any warnings appear during installation, they can be safely ignored).
 
