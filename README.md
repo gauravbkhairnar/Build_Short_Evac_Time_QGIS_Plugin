@@ -106,7 +106,7 @@ If no OpenStreetMap (OSM) pedestrian road network is found in the vicinity of th
 
 > **__Note:__**
 > * The model executes using sequential processing; parallel or multiprocessing is not currently implemented.
-> * Sample datasets for the Build Shortest Evacuation Time plugin are provided in the [sample data](https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS/tree/main/sample_data) folder for testing and demonstration purposes.
+> * Sample datasets for the Build Shortest Evacuation Time plugin are provided in the [sample data](https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin/tree/main/sample_data) folder for testing and demonstration purposes.
 
 ## Development Team:
 Gaurav Khairnar, RS Mahendra, Ch Patanjali, TNC Kartik, Sudheer Joseph, TM Balakrishnan Nair 
