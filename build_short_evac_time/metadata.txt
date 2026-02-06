@@ -1,0 +1,47 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Build_Short_Evac_Time
+qgisMinimumVersion=3.0
+description=Building level Shortest Evacuation Time
+version=0.1
+author=Gaurav Khairnar
+email=gaurav.b.khairnar@gmail.com
+owners=Gaurav
+
+about=Build_Short_Evac_Time is a QGIS plugin designed to automatically identify buildings requiring evacuation within a tsunami-affected area and generate shortest evacuation routes to designated safe shelters using minimal user inputs.
+
+tracker=https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin/issues
+repository=https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=no
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=Tsunami Inundation, Evacuation ,Risk Reduction, Preparedness, communities, safe Shelters
+
+homepage=https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies= - Python packages: geopandas, shapely, osmnx, network, scipy, requests
+
+Category of the plugin:Vector
+
+# If the plugin can run on QGIS Server.
+server=False
+

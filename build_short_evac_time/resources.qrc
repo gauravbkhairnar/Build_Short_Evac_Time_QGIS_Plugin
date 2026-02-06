@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/Build_Short_Evac_Time" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
