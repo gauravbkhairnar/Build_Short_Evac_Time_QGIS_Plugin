@@ -10,8 +10,6 @@
   </tr>
 </table>
 
-<h>A [QGIS](https://qgis.org/en/site/index.html) plugin for computing building-level evacuation planning. It automatically identifies buildings located within a flood inundation area and computes the shortest evacuation routes from these at-risk buildings to designated safe shelters.</h>
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ## General Information
 <p>
