@@ -1,5 +1,5 @@
 <p align="center">
-	<img width="821" height="81" alt="Name_icon" src="https://github.com/user-attachments/assets/909dd0d0-7f42-4739-89d0-02c2181ec9bb" />
+	<img width="821" height="81" alt="Name_icon" src="build_short_evac_time/icon.png" />
 </p>
 
 <h>A [QGIS](https://qgis.org/en/site/index.html) plugin for computing building-level evacuation planning. It automatically identifies buildings located within a flood inundation area and computes the shortest evacuation routes from these at-risk buildings to designated safe shelters.</h>
