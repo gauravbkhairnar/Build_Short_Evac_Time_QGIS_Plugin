@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td>
-      <img src="https://github.com/user-attachments/assets/2810615e-b2d5-4201-8b8a-fda02d84e71a" width="520"/>
+      <img src="https://github.com/user-attachments/assets/2810615e-b2d5-4201-8b8a-fda02d84e71a" width="620"/>
     </td>
     <td>
       <h1>Build_Short_Evac_Time_QGIS_Plugin</h1>
