@@ -11,7 +11,7 @@
 </table>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![QGIS](https://img.shields.io/badge/QGIS-plugin-orange.svg)](https://opengeoai.org/qgis_plugin)
+[![QGIS](https://img.shields.io/badge/QGIS-plugin-orange.svg)](https://plugins.qgis.org/plugins/build_short_evac_time/)
 ## General Information
 <p>
   This plugin automatically identifies buildings located within a tsunami or flood inundation area and computes the shortest evacuation routes from these at-risk buildings to designated safe shelters. The analysis is performed using minimal user inputs and leverages OpenStreetMap (OSM) road networks to generate evacuation paths.
