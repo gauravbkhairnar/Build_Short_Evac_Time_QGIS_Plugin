@@ -23,7 +23,7 @@ authors:
 affiliations:
   - name: Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Hyderabad
     index: 1
-date: 2026-02-XX
+date: 2026-02-14
 bibliography: paper.bib
 ---
 
