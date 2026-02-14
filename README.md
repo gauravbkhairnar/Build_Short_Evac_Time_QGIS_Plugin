@@ -71,7 +71,8 @@ The following layers are required:
 ## Step-by-Step workflow
 ## Step 1: Open the Plugin
 After successful installation, QGIS --> Plugins --> build_short_evac_time --> Build Shortest Evacuation Time. As shown in the figure below.
-<img width="976" height="217" alt="start" src="https://github.com/user-attachments/assets/c843d463-bd79-49d8-8e48-1f57694d44c6" />
+<img width="938" height="249" alt="image" src="https://github.com/user-attachments/assets/c3c645a9-41c0-4c68-b608-c3ed63877e4a" />
+
 
 ## Step 2: Select Input Layers
 * If the Buildings, Evacuation Shelters, and Flood Inundation layers are already loaded in the QGIS Layers Panel, select them using the respective dropdown menus.
@@ -81,7 +82,7 @@ After successful installation, QGIS --> Plugins --> build_short_evac_time --> Bu
 * If no output folder is provided, the plugin will automatically create temporary layers in memory.
 ## Step 4: Run the Model
 Steps are shown in the Figure below:
-<img width="940" height="601" alt="image" src="https://github.com/user-attachments/assets/70613a28-ddcb-44f7-8259-a9a09a6bbf51" />
+<img width="1032" height="639" alt="Run" src="https://github.com/user-attachments/assets/da1484a3-bef7-4048-a865-e01cbae4c488" />
 
 ## Output
 After successful execution, the output layers will be added to the QGIS Layers Panel:
