@@ -27,14 +27,14 @@
 ### Installation of Prerequisites:
   
   #### For Windows:
-  * Copy filepath --> Start --> Open OSGeo4W Shell --> cd (paste filepath) --> Enter -->
+  * Copy requirement.txt filepath --> Start --> Open OSGeo4W Shell --> cd (paste filepath) --> Enter -->
   * paste this 
   ```bash
 	pip install -r requirements.txt
 ```
 
   #### For Linux:
-  * Open terminal --> cd filepath -->
+  * Open terminal --> cd requirement.txt filepath -->
   * paste this
     
     ```bash
