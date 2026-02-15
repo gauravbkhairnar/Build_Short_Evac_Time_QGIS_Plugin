@@ -1,5 +1,5 @@
 ---
-title: "Building-level Shortest Evacuation Time: A QGIS plugin for evacuation planning"
+title: "Building-level Shortest Evacuation Time: A QGIS plugin for time-based evacuation management"
 tags:
   - QGIS
   - GIS
