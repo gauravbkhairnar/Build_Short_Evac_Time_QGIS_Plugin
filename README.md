@@ -53,20 +53,21 @@
 
 ## Input required:
 
-  All the input data are in vector format with extensions .shp or .geojson
-All input datasets must be vector layers in one of the supported formats:
+First three datasets (Building, Evacuation Shelter and Inunndation layer) must be vector layers in one of the supported formats:
 
 * Shapefile(.shp)
 * Geojosn (.geojson)
+
+Optional Digital Elevation Model must be in .tff file format.
 
 The following layers are required:
 1. Building Layer (Geometry type: Polygon)
 2. Evacuation Shelters Layer (Geometry type: Point)
 3. Flood Inundation Layer (Geometry type: Polygon)
+4. (Optional) Digital Elevation Model (Raster file: TIFF)
 
 > **__Note:__**
 > * All input layers must be projected in EPSG:4326 (WGS 84) to ensure correct spatial analysis and routing.
-> * Please create an 'id' field in the Evacuation Shelter layer and assigned unique id to each Evacuation Shelter. 
 
 ## Step-by-Step workflow
 ## Step 1: Open the Plugin
@@ -77,6 +78,7 @@ After successful installation, QGIS --> Plugins --> build_short_evac_time --> Bu
 ## Step 2: Select Input Layers
 * If the Buildings, Evacuation Shelters, and Flood Inundation layers are already loaded in the QGIS Layers Panel, select them using the respective dropdown menus.
 * Alternatively, use the Browse buttons to select input layers directly from disk without adding them to the Layers Panel
+* Uploading DEM is optional. If it is provided, terrain slopes will be incorporated in walking time which will be more realistic. If DEM is not provided then terrain is assumed to be flat.
 ## Step 3: Select Output Folder (Optional)
 * Specify an output folder where the results will be saved.
 * If no output folder is provided, the plugin will automatically create temporary layers in memory.
@@ -101,7 +103,7 @@ After successful execution, the output layers will be added to the QGIS Layers P
 * All evacuees are assumed to be physically fit adults capable of walking without assistance.
 * The road network derived from OpenStreetMap is assumed to be fully passable and in good condition for evacuation. The off-road evacuation was not considered.
 * All evacuees are assumed to start from the nearest accessible node/junction on the road network. The distance from each building to the nearest junction and the walking time within the building (in case of a big building/multi-story) are not considered.  
-* Terrain is assumed to be flat; slopes along the routes are not considered.
+
 
 ## Exceptions and Special Conditions
 * No Buildings in the Flood Zone
