@@ -82,7 +82,7 @@ After successful installation, QGIS --> Plugins --> build_short_evac_time --> Bu
 * If no output folder is provided, the plugin will automatically create temporary layers in memory.
 ## Step 4: Run the Model
 Steps are shown in the Figure below:
-<img width="1032" height="639" alt="Run" src="https://github.com/user-attachments/assets/da1484a3-bef7-4048-a865-e01cbae4c488" />
+<img width="1027" height="667" alt="Run_update" src="https://github.com/user-attachments/assets/5c869117-b20d-420a-b00a-cac3d6ed3f53" />
 
 ## Output
 After successful execution, the output layers will be added to the QGIS Layers Panel:
