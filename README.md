@@ -99,7 +99,7 @@ After successful execution, the output layers will be added to the QGIS Layers P
 * Walking time is calculated and stored in the Time field from the building to the shelter.
 
 ## Assumptions
-* The evacuation mode during the inundation hazards is preferably by walking to avoid traffic congestion. Walking speed is considered as 4.68 m/s
+* The evacuation mode during the inundation hazards is preferably by walking to avoid traffic congestion. Walking speed is considered as 5 m/s
 * All evacuees are assumed to be physically fit adults capable of walking without assistance.
 * The road network derived from OpenStreetMap is assumed to be fully passable and in good condition for evacuation. The off-road evacuation was not considered.
 * All evacuees are assumed to start from the nearest accessible node/junction on the road network. The distance from each building to the nearest junction and the walking time within the building (in case of a big building/multi-story) are not considered.  
