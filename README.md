@@ -60,7 +60,7 @@
 First three datasets (Building, Evacuation Shelter and Inunndation layer) must be vector layers in one of the supported formats:
 
 * Shapefile(.shp)
-* Geojosn (.geojson)
+* Geojson (.geojson)
 
 Optional Digital Elevation Model must be in .tff file format.
 
