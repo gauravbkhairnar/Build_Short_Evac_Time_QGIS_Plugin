@@ -34,7 +34,7 @@ bibliography: paper.bib
 
 Evacuation planning in flood- and inundation hazard-prone areas (e.g., tsunami, storm surge, and coastal flooding) requires tools that can efficiently compute and visualize evacuation routes from individual buildings toward safe locations. Although existing GIS workflows can perform network-based analysis and QGIS provides general spatial and network analysis capabilities, implementing a complete workflow for building-level evacuation routing typically requires multiple manual steps or custom scripting. There is a lack of easy-to-use QGIS plugins tailored specifically for at-risk building identification and shortest-time evacuation assessment based on walk-time in inundation scenarios. 
 
-‘Build_Short_Evac_Time’ a QGIS plugin addresses this gap by integrating inundation-based building selection with time-based network routing in a single interface. The theoretical framework of the tsunami walk-time modelling approach is described in Gaurav et al., (manuscript submitted and under review). This plugin provides an open-source implementation of that framework within QGIS, enabling reproducible and operational evacuation planning. The plugin computes evacuation time rather than only distance and assigns each building to the shelter that can be reached in the shortest time. When a Digital Elevation Model (DEM) is provided, evacuation time can optionally be adjusted based on terrain slope along the evacuation route, allowing slope-dependent realistic walking speed estimation. The resulting evacuation time is stored as an attribute, and buildings can be classified according to evacuation time thresholds for further analysis and visualization. 
+‘Build_Short_Evac_Time’ a QGIS plugin addresses this gap by integrating inundation-based building selection with time-based network routing in a single interface. The theoretical framework of the tsunami walk-time modelling approach is described in Gaurav et al., (manuscript submitted and under review). This plugin provides an open-source implementation of that framework within QGIS, enabling reproducible and operational evacuation planning. The plugin computes evacuation time rather than only distance and assigns each building to the nearest shelter that can be reached in the shortest time. When a Digital Elevation Model (DEM) is provided, evacuation time can optionally be adjusted based on terrain slope along the evacuation route, allowing slope-dependent realistic walking speed estimation. The resulting evacuation time is stored as an attribute, and buildings can be classified according to evacuation time thresholds for further analysis and visualization. 
 
 This tool supports disaster risk planners, researchers, and GIS practitioners in generating reproducible and terrain-aware evacuation analyses within an open-source GIS environment. 
 
@@ -62,4 +62,15 @@ The plugin operates within the QGIS environment and provides an integrated workf
 - **Output generation**:
   After successful execution, 2 output layers will generate, first is buildings which are at risk and second is evacuation routes. Each building is assigned to the nearest evacuation shelter and that shelter’s ID and evacuation time is added in that building’s attribute. 
 Buildings are classified according to evacuation time categories for further spatial analysis and visualization.
+
+# Availability
+The source code for Building-level Shortest Evacuation Time is openly available at:
+https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin
+
+The plugin is distributed under the MIT License. It is designed to operate within the QGIS environment and can be installed through the QGIS Plugin Manager or manually from the repository. The project documentation, installation instructions, and example usage are provided in the repository README.
+
+# Acknowledgements
+
+This plugin utilizes road network data obtained from OpenStreetMap, a collaborative mapping initiative supported by contributors worldwide. The authors gratefully acknowledge the OpenStreetMap community for providing openly accessible geospatial data. The authors also extend their appreciation to the developers of QGIS Plugin Builder for their valuable tool and support. Furthermore, the authors express their sincere gratitude to the Director INCOIS and Ministry of Earth Sciences for providing the necessary infrastructure, research facilities, and financial support. The institutional guidance and support were instrumental in the successful completion of this research.
+
 
