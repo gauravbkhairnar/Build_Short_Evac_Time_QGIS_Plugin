@@ -30,22 +30,24 @@ from qgis.PyQt import QtWidgets
 from qgis.core import (
     QgsProject, QgsFeature,
     QgsGeometry,
-    QgsVectorLayer, QgsField,
+    QgsVectorLayer, QgsField, QgsRasterLayer,
     QgsFields, QgsVectorFileWriter,
-    QgsCoordinateReferenceSystem,
-    QgsWkbTypes
-)
+    QgsCoordinateReferenceSystem, QgsCategorizedSymbolRenderer,
+    QgsWkbTypes,
+    QgsSymbol, 
+    QgsMapLayerProxyModel, QgsPointXY,
+    QgsRendererCategory)
 import geopandas as gpd
-from PyQt5.QtCore import QVariant
+from PyQt5.QtCore import QVariant, Qt
 import pandas as pd
 from shapely import wkt
 from shapely.geometry import shape, LineString
 import osmnx as ox
 import networkx as nx
 from .Build_Short_Evac_Time_help import BuildShortEvacTimeHelpDialog
-from qgis.core import QgsMapLayerProxyModel
 from qgis.gui import QgsMapLayerComboBox
-
+from PyQt5.QtGui import QColor
+import numpy as np
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'Build_Short_Evac_Time_dialog_base.ui'))
@@ -61,11 +63,15 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.external_building_layer = None
         self.external_shelter_layer = None
         self.external_flood_layer = None
+        self.external_dem_layer = None
         self.outputFolderLineEdit.setPlaceholderText("[Create temporary layer]")
         self._cancelled = False
         self.buildingLayerCombo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
         self.shelterLayerCombo.setFilters(QgsMapLayerProxyModel.PointLayer)
         self.floodLayerCombo.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.demLayerCombo.setFilters(QgsMapLayerProxyModel.RasterLayer)
+        self.demLayerCombo.setAllowEmptyLayer(True)
+        self.demLayerCombo.setToolTip("Digital Elevation Model (DEM) raster used for elevation-based analysis.")
         self.buildingLayerCombo.setAllowEmptyLayer(True)
         self.shelterLayerCombo.setAllowEmptyLayer(True)
         self.floodLayerCombo.setAllowEmptyLayer(True)
@@ -90,28 +96,33 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMapLayerProxyModel.PolygonLayer
             )
         )
-  
+        self.browseDemButton.clicked.connect(
+            lambda: self._set_external_layer(
+                self.demLayerCombo,
+                QgsMapLayerProxyModel.RasterLayer
+            )
+        )
         ok_button = self.buttonbox.button(QtWidgets.QDialogButtonBox.Ok)
         ok_button.setText("Run")
         ok_button.clicked.connect(self.run_evacuation)
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
-        
+
         self.buildingLayerCombo.setToolTip(
             "Polygon layer representing buildings or structures to be evacuated."
         )
-        
+
         self.shelterLayerCombo.setToolTip(
             "Point layer representing safe shelters or evacuation centers."
         )
-        
+
         self.floodLayerCombo.setToolTip(
             "Flood or inundation layer used to identify buildings under risk."
         )
-        
+
         self.help_dialog = None
         self.helpButton.clicked.connect(self.open_help)
-    
+
     def select_output_folder(self):
         folder = QFileDialog.getExistingDirectory(
             self,
@@ -119,105 +130,132 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
             "",
             QFileDialog.ShowDirsOnly
         )
-    
+
         if folder:
             self.outputFolderLineEdit.setText(folder)
     def _set_external_layer(self, combo, geom_type):
         layer = self.browse_external_layer(geom_type)
         if not layer:
             return
-        self._external_layers.append(layer)
 
+        self._external_layers.append(layer)
         if combo is self.buildingLayerCombo:
             self.external_building_layer = layer
             self.buildingPathLabel.setText(layer.source())
+
         elif combo is self.shelterLayerCombo:
             self.external_shelter_layer = layer
             self.shelterPathLabel.setText(layer.source())
+
         elif combo is self.floodLayerCombo:
             self.external_flood_layer = layer
             self.floodPathLabel.setText(layer.source())
 
+        elif combo is self.demLayerCombo:
+            self.external_dem_layer = layer
+            self.demPathLabel.setText(layer.source())
+
+
     def browse_external_layer(self, expected_geom):
+        if expected_geom == QgsMapLayerProxyModel.RasterLayer:
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Select DEM",
+                "",
+                "Raster layers (*.tif *.tiff *.img *.asc)"
+            )
+
+            if not file_path:
+                return None
+
+            layer = QgsRasterLayer(file_path, os.path.basename(file_path)) #
+            print(layer)
+
+            if not layer.isValid():
+                self.iface.messageBar().pushCritical(
+                    "Error", "Invalid raster layer."
+                )
+                return None
+
+            return layer
+
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Select layer",
             "",
             "Vector layers (*.shp *.gpkg *.geojson)"
         )
-    
+
         if not file_path:
             return None
-    
+
         layer = QgsVectorLayer(file_path, os.path.basename(file_path), "ogr")
-    
+
         if not layer.isValid():
             self.iface.messageBar().pushCritical(
                 "Error", "Invalid vector layer."
             )
             return None
-    
-        if expected_geom == QgsMapLayerProxyModel.PointLayer and layer.geometryType() != QgsWkbTypes.PointGeometry:
+
+        if (
+            expected_geom == QgsMapLayerProxyModel.PointLayer
+            and layer.geometryType() != QgsWkbTypes.PointGeometry
+        ):
             self.iface.messageBar().pushWarning(
                 "Wrong layer", "Please select a POINT layer."
             )
             return None
-    
-        if expected_geom == QgsMapLayerProxyModel.PolygonLayer and layer.geometryType() != QgsWkbTypes.PolygonGeometry:
+
+        if (
+            expected_geom == QgsMapLayerProxyModel.PolygonLayer
+            and layer.geometryType() != QgsWkbTypes.PolygonGeometry
+        ):
             self.iface.messageBar().pushWarning(
                 "Wrong layer", "Please select a POLYGON layer."
             )
             return None
-    
+
         return layer
-    
-    
- 
-        
+
     def _replace_with_layer_combo(self, old_combo, layer_filter):
         parent = old_combo.parentWidget()
         layer_combo = QgsMapLayerComboBox(parent)
         layer_combo.setFilters(layer_filter)
         layer_combo.setAllowEmptyLayer(True)
-    
         layer_combo.setGeometry(old_combo.geometry())
         layer_combo.setObjectName(old_combo.objectName())
-    
-        
+
+
         old_combo.hide()
         old_combo.deleteLater()
-    
+
         layer_combo.show()
-    
+
         setattr(self, layer_combo.objectName(), layer_combo)
-    
+
     def _resolve_layer(self, combo, external_layer, layer_name):
         layer = combo.currentLayer() or external_layer
-        
         return layer
-    
+
 
     def open_help(self):
         if self.help_dialog is None:
             self.help_dialog = BuildShortEvacTimeHelpDialog(self)
-    
         self.help_dialog.show()
         self.help_dialog.raise_()
         self.help_dialog.activateWindow()
-        
+
     def cancel_run(self):
         self._cancelled = True
         self.statusLabel.setText("Cancelled by user")
         self.progressBar.setVisible(False)
 
-    
+
     def run_evacuation(self):
         self.show()
-
         self.progressBar.setVisible(True)
         self.progressBar.setValue(0)
         QApplication.processEvents()
-        
         cancel_button = self.buttonbox.button(QtWidgets.QDialogButtonBox.Cancel)
         cancel_button.clicked.connect(self.cancel_run)
 
@@ -228,7 +266,7 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         if not building_layer:
             return
-    
+
         shelter_layer = self._resolve_layer(
             self.shelterLayerCombo,
             self.external_shelter_layer,
@@ -236,7 +274,7 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         if not shelter_layer:
             return
-    
+
         flood_layer = self._resolve_layer(
             self.floodLayerCombo,
             self.external_flood_layer,
@@ -244,8 +282,17 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         if not flood_layer:
             return
-        
-    
+
+        dem_layer = self._resolve_layer(
+            self.demLayerCombo,
+            self.external_dem_layer,
+            "Digital Elevation Model"
+        )
+
+        if not dem_layer:
+            pass
+
+
         # warning for iinputs
         if not all([building_layer, shelter_layer, flood_layer]):
             self.iface.messageBar().pushWarning(
@@ -256,98 +303,111 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.statusLabel.setVisible(True)
         self.statusLabel.setText("Validating inputs…")
         QApplication.processEvents()
-        
+
         output_folder = self.outputFolderLineEdit.text().strip()
         use_memory = not bool(output_folder)
         if not output_folder:
             use_memory = True
-            
-         
-            
+
         if use_memory:
             self.iface.messageBar().pushInfo("Output","No output path provided. Results will be created as temporary layers." )
-        
+
         if not self._check_geometry(building_layer, QgsWkbTypes.PolygonGeometry, "Building layer"):
             return
-    
+
         if not self._check_geometry(shelter_layer, QgsWkbTypes.PointGeometry, "Shelter layer"):
             return
-    
+
         if not self._check_geometry(flood_layer, QgsWkbTypes.PolygonGeometry, "Flood extent"):
             return
-        
-        
-        
-        
+
+
+
+        # Reporjection (if required)
         target_crs = building_layer.crs()
 
         shelter_layer = self._reproject_if_needed(shelter_layer, target_crs)
         flood_layer = self._reproject_if_needed(flood_layer, target_crs)
-    
-        
+        if dem_layer:
+            dem_layer = self._reproject_if_needed(dem_layer, target_crs)
+
+
         # For UTM conversions: 
         longitude = building_layer.extent().center().x()
         latitude = building_layer.extent().center().y()
-        
+
         utm_zone = int((longitude+180)/6)+1
-        
+
         if latitude > 0 :
             epsg_code = 'EPSG:'+str(32600 + utm_zone) # Northen Hemispehere
         else:
             epsg_code = 'EPSG:'+str(32700 + utm_zone) # southern hemisphere
-            
-        
+
+
         buildings_gdf = self.qgis_layer_to_gdf(building_layer)
         flood_gdf = self.qgis_layer_to_gdf(flood_layer)
         shelters_gdf = self.qgis_layer_to_gdf(shelter_layer)
-        
-        #shelters_gdf = shelters_gdf.to_crs(epsg_code)
-        
         buildings_gdf = buildings_gdf.to_crs(epsg_code)
         flood_gdf = flood_gdf.to_crs(epsg_code)
         shelters_gdf = shelters_gdf.to_crs(epsg_code)
         buildings_at_risk = buildings_gdf[buildings_gdf.geometry.intersects(flood_gdf.geometry.iloc[0])]
-        
+
+        if dem_layer:
+            params = {
+                'INPUT': dem_layer,
+                'TARGET_CRS': epsg_code,
+                'RESAMPLING': 0,      # Nearest neighbour (safe default)
+                'NODATA': None,
+                'TARGET_RESOLUTION': None,
+                'OPTIONS': '',
+                'DATA_TYPE': 0,       # Use input data type
+                'OUTPUT': 'TEMPORARY_OUTPUT'
+            }
+            dem_reprojected = processing.run("gdal:warpreproject", params)
+            dem_reprojected_path = dem_reprojected['OUTPUT']  # this is a STRING
+
+            dem = QgsRasterLayer(dem_reprojected_path,  "dem_UTM_reprojected")
+
+
         if len(buildings_at_risk) == 0:
             self.statusLabel.setText("No buildings in the flood zone")
             self.statusLabel.setVisible(True)   
             self.progressBar.setValue(100)
             return 
-        
+
         flooded_bldgs = buildings_at_risk.to_crs(epsg_code)
-        
-        
+
+
         targeted_shelters = shelters_gdf[~shelters_gdf.geometry.intersects(flood_gdf.geometry.iloc[0])]
-        
+
         if len(targeted_shelters) == 0:
                 self.statusLabel.setText("All Evacuation Shelters are in flood zone")
                 self.statusLabel.setVisible(True)   
                 self.progressBar.setValue(100)
                 return 
-            
+
         targeted_shelters = targeted_shelters.to_crs(epsg_code)
         shelters_gdf = targeted_shelters[~targeted_shelters.geometry.isna()]
-         
+
         shelters_gdf['id'] = shelters_gdf.index+1
+        shelters_with_uid = shelters_gdf.to_crs('EPSG:4326')
         if not output_folder:
-            self.gdf_to_memory_layer(
-                shelters_gdf,
+            self.gdf_to_layer(
+                shelters_with_uid,
                 "Shelters with id"
             )
         else:
             self.gdf_to_layer(
-                shelters_gdf,
+                shelters_with_uid,
                 "Shelters_with_id",
                 output_folder
             )
-        
-         
-        
+
+
+
         self.statusLabel.setText("Extracting flooded buildings…")
         QApplication.processEvents()
 
-        
-        
         print("Buildings in flood zone:", len(flooded_bldgs))
         self.statusLabel.setText("Building road network…")
         QApplication.processEvents()
@@ -355,14 +415,13 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         extent = building_layer.extent()
         center_x = (extent.xMinimum() + extent.xMaximum()) / 2
         center_y = (extent.yMinimum() + extent.yMaximum()) / 2
-        
+
         width = extent.xMaximum() - extent.xMinimum()
         height = extent.yMaximum() - extent.yMinimum()
         radius = int(max(width, height) / 2 + 1000)  # buffer
-        
+
         ox.settings.log_console = False
         ox.settings.use_cache = True
-
         try:
             graph = ox.graph_from_point(
                 (center_y, center_x),
@@ -379,70 +438,136 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
             self.statusLabel.setText("Process stopped: no road network found")
             self.statusLabel.setVisible(True)
             return
-         
-         
+
+
         graph_proj = ox.project_graph(graph)
         edges = ox.graph_to_gdfs(graph_proj, nodes=False, edges=True)
         nodes = ox.graph_to_gdfs(graph_proj, nodes=True, edges=False)
-        
+
         def shelters_meta(targeted_shelters, graph_proj):
             evac_nodes_list = []
-        
+
             for idx, shelter in targeted_shelters.iterrows():
                 if self._cancelled:
                     return
 
-        
                 centroid = shelter.geometry.centroid
                 single_shelter_xy = (centroid.y, centroid.x)
-        
+
                 single_shelter_node = ox.distance.nearest_nodes(
                     graph_proj,
                     X=single_shelter_xy[1],
                     Y=single_shelter_xy[0]
                 )
-        
+
                 single_shelter_df = pd.DataFrame({
                     'id': [shelter['id']],
                     'node': [single_shelter_node]
                 })
-        
+
                 evac_nodes_list.append(single_shelter_df)
-        
+
             targeted_shelters = pd.concat(evac_nodes_list, ignore_index=True)
             return targeted_shelters
-        
+
         def short_path(evac_shelters,source):
             all_buildings_shortest_time_list = []
             for evac in range(len(evac_shelters)):
-                Evac_route = nx.shortest_path(graph_proj, source = single_buildings_node, target=evac_shelters.iloc[evac].node, weight='length')
+                Evac_route = nx.shortest_path(graph_proj, source = source, target=evac_shelters.iloc[evac].node, weight='length')
                 Evac_route_nodes = nodes.loc[Evac_route]
-                
-                
-                
+
                 coords = [(point.x, point.y) for point in Evac_route_nodes.geometry]
 
                 if len(coords) > 1:
                     Evac_route_line = LineString(coords)
                     Evac_route_geom = gpd.GeoDataFrame(crs=edges.crs, geometry=[Evac_route_line])
                     Evac_route_geom['id_assigned'] = evac_shelters.iloc[evac].id
-                    Evac_route_geom['Time'] = round(((Evac_route_geom.length/ 1000) / 4.68) * 60,2)
-                    Evac_route_geom['X'] = single_buildings_xy[1]
-                    Evac_route_geom['Y'] = single_buildings_xy[0]
-                    
+                    Evac_route_geom['Time'] = round(((Evac_route_geom.length/ 1000) / 5) * 60,2)
+                    #Evac_route_geom['X'] = single_buildings_xy[1]
+                    #Evac_route_geom['Y'] = single_buildings_xy[0]
+
                     all_buildings_shortest_time_list.append(Evac_route_geom)
-                     
-            
+
             min_len_route = pd.concat(all_buildings_shortest_time_list)
             min_len_route = min_len_route.sort_values(by=['Time'])
             min_len_route = min_len_route.reset_index().drop(columns=['index'])
             min_len_route = min_len_route.iloc[[0]]
-            
+
             return min_len_route
-            
-                    
-                    
-            
+
+                
+        def shortest_path_analysis(evac_shelters,source,dem,graph_proj,nodes,edges):
+
+            all_building_shortest_time_list =[]
+            for i in range(len(evac_shelters)):
+                Evac_route = nx.shortest_path(graph_proj, source = source, target=evac_shelters.iloc[i].node, weight='length')
+                Evac_route_nodes = nodes.loc[Evac_route]
+
+                coords = [(point.x, point.y) for point in Evac_route_nodes.geometry]
+
+                if len(coords) > 1:
+                    Evac_route_line = LineString(coords)
+
+                    Evac_route_geom = gpd.GeoDataFrame(crs=edges.crs, geometry=[Evac_route_line])
+                    #Evac_route_geom['length_m'] = Evac_route_geom.length
+                    Evac_route_geom['id_assigned'] = evac_shelters.iloc[i].id
+                    #Evac_route_geom['nodes'] = [Evac_route]
+                    #Evac_route_geom['osm_time'] = round(((Evac_route_geom.length/ 1000) / 5.472) * 60,2)            
+
+                    line = Evac_route_geom.geometry.iloc[0]
+                    coords = list(line.coords)
+                    elevations = [get_elevation(x, y, dem) for x, y in coords]
+                    durations_sec = []
+
+                    for i in range(len(coords) - 1):
+                        x1, y1 = coords[i]
+                        x2, y2 = coords[i + 1]
+
+                        elev1 = elevations[i]
+                        elev2 = elevations[i + 1]
+
+                        horizontal_dist = ((x2 - x1)**2 + (y2 - y1)**2)**0.5  # in meters
+                        rise = elev2 - elev1
+                        slope = rise / horizontal_dist if horizontal_dist != 0 else 0
+                        #print(slope)
+                        # Tobler's hiking function (speed in km/h)
+                        speed_kmh = 6 * np.exp(-3.5 * (slope + 0.05))
+
+                        # Convert speed to m/s
+                        speed_mps = speed_kmh * 1000 / 3600
+
+                        # Time = distance / speed
+                        duration = horizontal_dist / speed_mps if speed_mps != 0 else 0
+
+                        # Store results
+
+                        durations_sec.append(duration)
+
+                    Evac_route_geom['Time'] =  round(sum(durations_sec) / 60,2)
+                    #Evac_route_geom['id'] = shortest_path.id[0]
+                    #Evac_route_geom['start_ele'] = round(elevations[0],2)
+                    #Evac_route_geom['end_ele'] = round(elevations[-1],2)
+                    all_building_shortest_time_list.append(Evac_route_geom)
+
+            min_len_route = pd.concat(all_building_shortest_time_list)
+            min_len_route = min_len_route.sort_values(by=['Time'])
+            min_len_route = min_len_route.reset_index().drop(columns=['index'])
+            #print(min_len_route['osm_time'][0],min_len_route['tobler time'][0])
+
+            min_len_route = min_len_route.iloc[[0]]
+
+            return min_len_route
+
+
+        def get_elevation(x, y, raster_layer, band=1):
+            point = QgsPointXY(x, y)
+            result = raster_layer.dataProvider().sample(point, band)
+
+            if result[1]:   # valid
+                return result[0]
+            else:
+                return None
+
         ##########################################################
         shelter_nodes_df = shelters_meta(shelters_gdf , graph_proj)
         self.statusLabel.setText("Computing evacuation routes…")
@@ -452,107 +577,99 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         building_cluster = []
         total = len(flooded_bldgs)
         for time,building in enumerate(range(len(flooded_bldgs))):
-            
+
             single_buildings_xy = (flooded_bldgs.iloc[building].geometry.centroid.y, flooded_bldgs.iloc[building].geometry.centroid.x)
             single_buildings_node = ox.distance.nearest_nodes(graph_proj,X= single_buildings_xy[1],Y= single_buildings_xy[0])
-            
-            
-            
-            
-            shortest_path = short_path(shelter_nodes_df, single_buildings_node)
-            shortest_path['X'] = single_buildings_xy[1]
-            shortest_path['Y'] = single_buildings_xy[0]
-            
-            
-            shortest_evacuation_routes.append(shortest_path)
-            
-            shortest_paths = shortest_path.drop(columns=['geometry'])
 
+
+            if dem_layer:
+                shortest_path = shortest_path_analysis(shelter_nodes_df, single_buildings_node,dem,graph_proj,nodes,edges) 
+            else:
+                shortest_path = short_path(shelter_nodes_df, single_buildings_node) 
+            # shortest_path['X'] = single_buildings_xy[1]
+            # shortest_path['Y'] = single_buildings_xy[0]
+            shortest_evacuation_routes.append(shortest_path)
+            shortest_paths = shortest_path.drop(columns=['geometry'])
             shortest_paths['geometry'] = flooded_bldgs.iloc[building].geometry
 
             building_cluster.append(shortest_paths)
             progress = 60 + int((time + 1) / total * 30)
             self.progressBar.setValue(progress)
             QApplication.processEvents()
-             
-                    
-                
+
         buildings_with_clusters = pd.concat(building_cluster,ignore_index=True)    
         all_evacuation_routes = pd.concat(shortest_evacuation_routes,ignore_index=True)   
-        
+
         buildings_with_clusters = gpd.GeoDataFrame(buildings_with_clusters,geometry = 'geometry', crs = epsg_code)
         print("Buildings in buildings_with_clusters zone:", len(buildings_with_clusters))
         all_evacuation_routes = gpd.GeoDataFrame(all_evacuation_routes,geometry = all_evacuation_routes.geometry, crs = epsg_code)
         all_evacuation_routes =all_evacuation_routes.dissolve(by="id_assigned")
         all_evacuation_routes = all_evacuation_routes.reset_index()
-        
-        
+
         buildings_with_clusters = buildings_with_clusters.to_crs('EPSG:4326')
         all_evacuation_routes = all_evacuation_routes.to_crs('EPSG:4326')
 
         self.statusLabel.setText("Finalizing outputs…")
-        QApplication.processEvents()
 
         if not output_folder:
-            self.gdf_to_memory_layer(
+            self.gdf_to_layer(
                 buildings_with_clusters,
                 "buildings_with_clusters"
             )
-            
-            self.gdf_to_memory_layer(
+
+            self.gdf_to_layer(
                 all_evacuation_routes,
                 "Evacuation_Routes"
             )
             self.statusLabel.setText("Evacuation analysis completed successfully")
             self.progressBar.setValue(100)
             QApplication.processEvents()
-    
+
             self.iface.messageBar().pushSuccess(
                 "Completed",
                 "Evacuation routes generated successfully"
             )
-            
+
         else:
             self.gdf_to_layer(
                 buildings_with_clusters,
                 "buildings_with_clusters",
                 output_folder
             )
-            
+
             self.gdf_to_layer(
                 all_evacuation_routes,
                 "Evacuation_Routes",
                 output_folder
             )
-    
+
             self.statusLabel.setText("Evacuation analysis completed successfully")
             self.progressBar.setValue(100)
             QApplication.processEvents()
-    
+
             self.iface.messageBar().pushSuccess(
                 "Completed",
                 "Evacuation routes generated successfully"
             )
-            
-        
 
-    
     def reset_ui(self):
         for combo in (
             self.buildingLayerCombo,
             self.shelterLayerCombo,
-            self.floodLayerCombo
+            self.floodLayerCombo,
+            self.demLayerCombo,
         ):
             if isinstance(combo, QgsMapLayerComboBox):
                 combo.setCurrentIndex(-1)
                 combo.setAllowEmptyLayer(True)
             else:
                 combo.setCurrentIndex(-1)
-    
+
         self.progressBar.setValue(0)
         self.buildingPathLabel.setText("")
         self.outputFolderLineEdit.setText("")
         self.floodPathLabel.setText("")
+        self.demPathLabel.setText("")
         self.shelterPathLabel.setText("")
         self.progressBar.setVisible(False)
         self.statusLabel.setText("Ready")
@@ -560,14 +677,14 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.external_building_layer = None
         self.external_shelter_layer = None
         self.external_flood_layer = None
+        self.external_dem_layer = None
 
-            
     def _check_geometry(self, layer, expected_geom, layer_name):
         if layer is None:
             return False
-    
+
         geom_type = QgsWkbTypes.geometryType(layer.wkbType())
-    
+
         if geom_type != expected_geom:
             self.iface.messageBar().pushCritical(
                 "Geometry Error",
@@ -576,121 +693,93 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
             return False
 
         return True
-    
+
     def _reproject_if_needed(self, source_layer, target_crs):
+        """
+        Reprojects vector or raster layer to target CRS if needed.
+        Returns a memory layer.
+        """
+
         if source_layer.crs() == target_crs:
             return source_layer
-    
+
+        # VECTOR
+        if isinstance(source_layer, QgsVectorLayer):
+            params = {
+                'INPUT': source_layer,
+                'TARGET_CRS': target_crs,
+                'OUTPUT': 'memory:'
+            }
+            result = processing.run("native:reprojectlayer", params)
+            return result['OUTPUT']
+
+        # RASTER
+        elif isinstance(source_layer, QgsRasterLayer):
+            params = {
+                'INPUT': source_layer,
+                'TARGET_CRS': target_crs,
+                'RESAMPLING': 0,      # Nearest neighbour (safe default)
+                'NODATA': None,
+                'TARGET_RESOLUTION': None,
+                'OPTIONS': '',
+                'DATA_TYPE': 0,       # Use input data type
+                'OUTPUT': 'TEMPORARY_OUTPUT'
+            }
+            result = processing.run("gdal:warpreproject", params)
+
+            raster_path = result['OUTPUT']  # this is a STRING
+
+            raster = QgsRasterLayer(raster_path, source_layer.name() + "_reprojected")
+
+            return raster
+
+
+
+        else:
+            raise TypeError("Layer must be QgsVectorLayer or QgsRasterLayer")
+            
+    def _reproject_if_needed_old(self, source_layer, target_crs):
+        if source_layer.crs() == target_crs:
+            return source_layer
+
         params = {
             'INPUT': source_layer,
             'TARGET_CRS': target_crs,
             'OUTPUT': 'memory:'
         }
-    
+
         result = processing.run("native:reprojectlayer", params)
         return result['OUTPUT']
-    
+
     def qgis_layer_to_gdf(self, layer):
         features = []
-    
+
         field_names = [f.name() for f in layer.fields()]
-    
+
         for feat in layer.getFeatures():
             # Convert geometry safely using WKT
             geom = shape(wkt.loads(feat.geometry().asWkt()))
             attrs = feat.attributes()
             features.append([geom] + attrs)
-    
+
         columns = ["geometry"] + field_names
         gdf = gpd.GeoDataFrame(features, columns=columns)
-    
+
         # Assign CRS safely
         gdf.set_crs(layer.crs().authid(), inplace=True)
-    
-        return gdf
-    
-    def gdf_to_memory_layer(self, gdf, layer_name):
 
-        geom_type = gdf.geometry.iloc[0].geom_type
-    
-        qgis_geom_map = {
-            "Point": "Point",
-            "MultiPoint": "MultiPoint",
-            "LineString": "LineString",
-            "MultiLineString": "MultiLineString",
-            "Polygon": "Polygon",
-            "MultiPolygon": "MultiPolygon"
-        }
-    
-        if geom_type not in qgis_geom_map:
-            raise ValueError(f"Unsupported geometry type: {geom_type}")
-    
-        qgis_geom = qgis_geom_map[geom_type]
-    
-        vl = QgsVectorLayer(
-            f"{qgis_geom}?crs={gdf.crs.to_string()}",
-            layer_name,
-            "memory"
-        )
-    
-        pr = vl.dataProvider()
-    
-        # ---- Add fields with correct types ----
-        fields = []
-        for col in gdf.columns:
-            if col == "geometry":
-                continue
-    
-            dtype = gdf[col].dtype
-    
-            if pd.api.types.is_integer_dtype(dtype):
-                qtype = QVariant.Int
-            elif pd.api.types.is_float_dtype(dtype):
-                qtype = QVariant.Double
-            elif pd.api.types.is_bool_dtype(dtype):
-                qtype = QVariant.Bool
-            else:
-                qtype = QVariant.String
-    
-            fields.append(QgsField(col, qtype))
-    
-        pr.addAttributes(fields)
-        vl.updateFields()
-    
-        # ---- Add features ----
-        features = []
-        for _, row in gdf.iterrows():
-            feat = QgsFeature()
-            feat.setGeometry(QgsGeometry.fromWkt(row.geometry.wkt))
-    
-            attrs = []
-            for col in gdf.columns:
-                if col == "geometry":
-                    continue
-    
-                val = row[col]
-                attrs.append(None if pd.isna(val) else val)
-    
-            feat.setAttributes(attrs)
-            features.append(feat)
-    
-        pr.addFeatures(features)
-        vl.updateExtents()
-    
-        QgsProject.instance().addMapLayer(vl)
-    
-        return vl
-    
+        return gdf
+          
     def gdf_to_layer(self, gdf, layer_name, output_folder=None):
- 
+
         if gdf.empty:
             self.iface.messageBar().pushWarning(
                 "Empty layer", f"{layer_name} has no features."
             )
             return None
- 
+
         geom_type = gdf.geometry.iloc[0].geom_type
-    
+
         qgis_geom_map = {
             "Point": QgsWkbTypes.Point,
             "MultiPoint": QgsWkbTypes.MultiPoint,
@@ -699,34 +788,54 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
             "Polygon": QgsWkbTypes.Polygon,
             "MultiPolygon": QgsWkbTypes.MultiPolygon
         }
-    
+
         if geom_type not in qgis_geom_map:
             raise ValueError(f"Unsupported geometry type: {geom_type}")
-    
+
         wkb_type = qgis_geom_map[geom_type]
-    
- 
         crs = QgsCoordinateReferenceSystem.fromWkt(gdf.crs.to_wkt())
+
+        # ---------------- CLASSIFICATION ----------------
+        labels = {}
     
- 
+        if geom_type in ["Polygon", "MultiPolygon"] and "Time" in gdf.columns:
+            
+            gdf["Time"] = gdf["Time"].round(2)
+            try:
+                qcut_result = pd.qcut(gdf["Time"], q=4, duplicates="drop")
+                gdf["Class"] = qcut_result.cat.codes + 1
+    
+                time_intervals = qcut_result.cat.categories
+                names = ["Short", "Moderate", "Long", "Very Long"]
+    
+                for i, interval in enumerate(time_intervals):
+                    low = round(interval.left, 2)
+                    high = round(interval.right, 2)
+                    labels[i + 1] = f"{names[i]} ({low}–{high} min)"
+    
+            except Exception as e:
+                print("Classification skipped:", e)
+
+        # ================= MEMORY LAYER MODE ======================
+
         if output_folder is None:
+
             vl = QgsVectorLayer(
                 QgsWkbTypes.displayString(wkb_type) + f"?crs={crs.authid()}",
                 layer_name,
                 "memory"
             )
+
             pr = vl.dataProvider()
-    
-        # ---------- SHAPEFILE MODE ----------
-        else:
-            shp_path = os.path.join(output_folder, f"{layer_name}.shp")
-    
-            fields = QgsFields()
+
+            # ---- Add fields ----
+            fields = []
             for col in gdf.columns:
                 if col == "geometry":
                     continue
-    
+
                 dtype = gdf[col].dtype
+    
                 if pd.api.types.is_integer_dtype(dtype):
                     qtype = QVariant.Int
                 elif pd.api.types.is_float_dtype(dtype):
@@ -735,9 +844,65 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
                     qtype = QVariant.Bool
                 else:
                     qtype = QVariant.String
-    
-                fields.append(QgsField(col[:10], qtype))  # SHP 10-char limit
-    
+
+                fields.append(QgsField(col, qtype))
+
+            pr.addAttributes(fields)
+            vl.updateFields()
+
+            # ---- Add features ----
+            features = []
+            for _, row in gdf.iterrows():
+                feat = QgsFeature()
+                feat.setGeometry(QgsGeometry.fromWkt(row.geometry.wkt))
+
+                attrs = []
+                for col in gdf.columns:
+                    if col == "geometry":
+                        continue
+                    val = row[col]
+                    attrs.append(None if pd.isna(val) else val)
+
+                feat.setAttributes(attrs)
+                features.append(feat)
+
+            pr.addFeatures(features)
+            vl.updateExtents()
+
+        # ================= SHAPEFILE MODE =========================
+
+        else:
+
+            shp_path = os.path.join(output_folder, f"{layer_name}.shp")
+
+            fields = QgsFields()
+            for col in gdf.columns:
+                if col == "geometry":
+                    continue
+
+                dtype = gdf[col].dtype
+
+                if pd.api.types.is_integer_dtype(dtype):
+                    qtype = QVariant.Int
+                elif pd.api.types.is_float_dtype(dtype):
+                    qtype = QVariant.Double
+                elif pd.api.types.is_bool_dtype(dtype):
+                    qtype = QVariant.Bool
+                else:
+                    qtype = QVariant.String
+
+                #fields.append(QgsField(col[:10], qtype))  
+                if col == "Time":
+                    fields.append(QgsField(col[:10], QVariant.Double, len=10, prec=2))
+                elif pd.api.types.is_integer_dtype(dtype):
+                    fields.append(QgsField(col[:10], QVariant.Int))
+                elif pd.api.types.is_float_dtype(dtype):
+                    fields.append(QgsField(col[:10], QVariant.Double))
+                elif pd.api.types.is_bool_dtype(dtype):
+                    fields.append(QgsField(col[:10], QVariant.Bool))
+                else:
+                    fields.append(QgsField(col[:10], QVariant.String))
+
             writer = QgsVectorFileWriter(
                 shp_path,
                 "UTF-8",
@@ -746,39 +911,79 @@ class BuildShortEvacTimeDialog(QtWidgets.QDialog, FORM_CLASS):
                 crs,
                 "ESRI Shapefile"
             )
-    
+
             if writer.hasError() != QgsVectorFileWriter.NoError:
                 raise RuntimeError(writer.errorMessage())
-    
-            # ---------- Write features ----------
+
             for _, row in gdf.iterrows():
                 feat = QgsFeature()
                 feat.setGeometry(QgsGeometry.fromWkt(row.geometry.wkt))
-    
+
                 attrs = []
                 for col in gdf.columns:
                     if col == "geometry":
                         continue
                     val = row[col]
                     attrs.append(None if pd.isna(val) else val)
-    
+
                 feat.setAttributes(attrs)
                 writer.addFeature(feat)
-    
-            del writer  # VERY IMPORTANT (flush to disk)
-    
+
+            del writer  
+
             vl = QgsVectorLayer(shp_path, layer_name, "ogr")
-    
-        # ---------- Add to map ----------
+
+        # ================= ADD TO MAP (ONLY ONCE) =================
+
         QgsProject.instance().addMapLayer(vl)
+
+        # ================= SYMBOLOGY ===============================
+
+
+        if geom_type in ["LineString", "MultiLineString"]:
+
+            style_path = os.path.join(
+                os.path.dirname(__file__),
+                "styles",
+                "routes.qml"
+            )
+
+            if os.path.exists(style_path):
+                vl.loadNamedStyle(style_path)
+                vl.triggerRepaint()
+
+        elif geom_type in ["Polygon", "MultiPolygon"] and "Class" in gdf.columns:
+
+            categories = []
+            class_colors = {
+                1: QColor(0, 150, 0),
+                2: QColor(255, 215, 0),
+                3: QColor(255, 140, 0),
+                4: QColor(220, 20, 60)
+            }
+
+            for class_value, color in class_colors.items():
+
+                if class_value not in labels:
+                    continue
+
+                symbol = QgsSymbol.defaultSymbol(vl.geometryType())
+                symbol.setColor(color)
+                symbol.symbolLayer(0).setStrokeStyle(Qt.NoPen)
+
+                category = QgsRendererCategory(
+                    class_value,
+                    symbol,
+                    labels[class_value]
+                )
+                categories.append(category)
+
+            renderer = QgsCategorizedSymbolRenderer("Class", categories)
+            vl.setRenderer(renderer)
+            vl.triggerRepaint()
+
         return vl
 
-
-
-
-
-
-
-
+    
 
 

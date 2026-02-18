@@ -26,20 +26,16 @@
 import os 
 import pkg_resources
 import site
-
+import sys
 
 def add_dependencies():
     extra_libs_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "required_python_packages")
     )
-
-    if os.path.isdir(extra_libs_path):
-        # add to python path
+    if os.path.isdir(extra_libs_path) and extra_libs_path not in sys.path:
+        sys.path.insert(0, extra_libs_path)
         site.addsitedir(extra_libs_path)
-        # pkg_resources doesn't listen to changes on sys.path.
-        pkg_resources.working_set.add_entry(extra_libs_path)
-
-# noinspection PyPep8Naming
+ 
 def classFactory(iface):  # pylint: disable=invalid-name
     """Load BuildShortEvacTime class from file BuildShortEvacTime.
 

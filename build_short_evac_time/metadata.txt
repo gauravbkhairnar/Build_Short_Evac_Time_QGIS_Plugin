@@ -6,7 +6,7 @@
 name=Build_Short_Evac_Time
 qgisMinimumVersion=3.0
 description=Building level Shortest Evacuation Time
-version=0.1
+version=1.1
 author=Gaurav Khairnar
 email=gaurav.b.khairnar@gmail.com
 owners=Gaurav
@@ -38,7 +38,7 @@ deprecated=False
 # Since QGIS 3.8, a comma separated list of plugins to be installed
 # (or upgraded) can be specified.
 # Check the documentation for more information.
-# plugin_dependencies= - Python packages: geopandas, shapely, osmnx, network, scipy, requests
+plugin_dependencies= geopandas, osmnx, shapely
 
 Category of the plugin:Vector
 
