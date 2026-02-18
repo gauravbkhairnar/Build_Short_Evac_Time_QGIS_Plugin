@@ -102,6 +102,9 @@ After successful execution, the output layers will be added to the QGIS Layers P
 * Each building is assigned to the nearest evacuation shelter and that shelter’s ID and the shortest route is computed between each building and its assigned shelter.
 * Walking time is calculated and stored in the Time field from the building to the shelter.
 
+<img width="580" height="474" alt="Output" src="https://github.com/user-attachments/assets/cc3bfdcd-8c0b-4713-92fb-0adb4e8597ea" />          <img width="369" height="471" alt="attribute_table" src="https://github.com/user-attachments/assets/8365c3e8-be6f-4afa-99f8-d0e549d65a85" />
+
+
 ## Assumptions
 * The evacuation mode during the inundation hazards is preferably by walking to avoid traffic congestion. Walking speed is considered as 5 m/s
 * All evacuees are assumed to be physically fit adults capable of walking without assistance.
