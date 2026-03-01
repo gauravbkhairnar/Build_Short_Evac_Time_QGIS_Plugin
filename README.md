@@ -148,10 +148,3 @@ https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system
 
 
 
-
-
-
-
-
-
-
