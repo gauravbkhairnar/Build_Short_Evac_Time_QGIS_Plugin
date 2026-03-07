@@ -14,7 +14,7 @@
   </tr>
 </table>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-red.svg)](https://opensource.org/licenses/MIT)
 [![QGIS](https://img.shields.io/badge/QGIS-plugin-Green.svg)](https://plugins.qgis.org/plugins/build_short_evac_time/)
 ## General Information
 <p>
