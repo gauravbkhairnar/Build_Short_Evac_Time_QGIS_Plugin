@@ -9,7 +9,7 @@ tags:
   - tsunami inundation
 authors:
   - name: Gaurav Khairnar
-    affiliation: 1
+    affiliation: "1, 2"
   - name: RS Mahendra
     affiliation: 1
   - name: Ch Patanjali
@@ -23,6 +23,8 @@ authors:
 affiliations:
   - name: Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Hyderabad
     index: 1
+  - name: Department of Climate Change, Indian Institute of Technology, Hyderabad
+    index: 2
 date: 2026-02-14
 bibliography: paper.bib
 ---
