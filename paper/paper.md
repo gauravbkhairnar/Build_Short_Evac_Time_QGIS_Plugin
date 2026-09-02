@@ -30,24 +30,24 @@ bibliography: paper.bib
 ---
 
 # Summery
-**Build Shortest Evacuation Time** is an open-source QGIS plugin that supports **building-level evacuation planning** for flood and inundation hazards. It automatically identifies buildings located within an inundation zone and computes **shortest evacuation routes** from those at-risk buildings to nearest safe shelters using Open Street Map (OSM) road network data. The plugin aims to assist GIS users and disaster risk planners in generating rapid evacuation path outputs with minimal input requirements
+**Build Shortest Evacuation Time** is an open-source QGIS plugin that supports **building-level evacuation planning** for flood and inundation hazards. It automatically identifies buildings located within an inundation zone and computes **shortest evacuation routes** from those at-risk buildings to nearest safe shelters using Open Street Map (OSM) road network data. The plugin aims to assist Local Goverment, GIS users and disaster risk planners in generating rapid evacuation path outputs with minimal input requirements
 
 # Statement of need
 
-Evacuation planning in flood- and inundation hazard-prone areas (e.g., tsunami, storm surge, and coastal flooding) requires tools that can efficiently compute and visualize evacuation routes from individual buildings toward safe locations. Although existing GIS workflows can perform network-based analysis and QGIS provides general spatial and network analysis capabilities, implementing a complete workflow for building-level evacuation routing typically requires multiple manual steps or custom scripting. There is a lack of easy-to-use QGIS plugins tailored specifically for at-risk building identification and shortest-time evacuation assessment based on walk-time in inundation scenarios. 
+Evacuation planning in flood and inundation hazard-prone areas (e.g., tsunami, storm surge and coastal flooding) requires tools that can efficiently compute and visualize evacuation routes from individual buildings toward safe locations. Although existing GIS workflows can perform network-based analysis and QGIS provides general spatial and network analysis capabilities, implementing a complete workflow for building-level evacuation routing typically requires multiple manual steps or custom scripting. There is a lack of easy-to-use QGIS plugins tailored specifically for at-risk building identification and shortest time evacuation assessment based on walk-time in inundation scenarios. 
 
-**Build_Short_Evac_Time** a QGIS plugin addresses this gap by integrating inundation-based building selection with time-based network routing in a single interface. The theoretical framework of the tsunami walk-time modelling approach is described in Gaurav et al., (manuscript submitted and under review). This plugin provides an open-source implementation of that framework within QGIS, enabling reproducible and operational evacuation planning. The plugin computes evacuation time rather than only distance and assigns each building to the nearest shelter that can be reached in the shortest time. When a Digital Elevation Model (DEM) is provided, evacuation time can optionally be adjusted based on terrain slope along the evacuation route, allowing slope-dependent realistic walking speed estimation. The resulting evacuation time is stored as an attribute, and buildings can be classified according to evacuation time thresholds for further analysis and visualization. 
+**Build_Short_Evac_Time** a QGIS plugin addresses this gap by integrating inundation-based buildings at risk selection with time-based network routing in a single interface. The theoretical framework of the tsunami walk-time modelling approach is described in Khairnar, G. et al. A geospatial framework for tsunami evacuation walk-time mapping. Spat. Inf. Res. 34, 33 (2026). https://doi.org/10.1007/s41324-026-00680-1. This plugin provides an open-source implementation of that framework within QGIS, enabling reproducible and operational evacuation planning. The plugin computes evacuation time rather than only distance and assigns each building to the nearest shelter that can be reached in the shortest time. When a Digital Elevation Model (DEM) is provided, evacuation time can optionally be adjusted based on terrain slope along the evacuation route, allowing slope-dependent realistic walking speed estimation. The resulting evacuation time is stored as an attribute and buildings can be classified according to evacuation time thresholds for further analysis and visualization. 
 
-This tool supports disaster risk planners, researchers, and GIS practitioners in generating reproducible and terrain-aware evacuation analyses within an open-source GIS environment. 
+This tool supports disaster risk planners, local goverment, researchers and GIS practitioners in generating reproducible and terrain-aware evacuation analyses within an open-source GIS environment. 
 
 # Functionality
 The plugin operates within the QGIS environment and provides an integrated workflow for building-level evacuation time analysis. Its main functionality includes:
 
 - **Input layers**:
-  - Building footprints (vector layer in .shp or .geojson format)
-  - Inundation or hazard extent polygon (vector layer in .shp or .geojson format)
-  - Shelter locations (point layer in .shp or .geojson format)
-  - Optional Digital Elevation Model (raster layer in preferably in .tiff format) for slope-based walking speed adjustment
+  - Building footprints (Polygon vector layer in .shp or .geojson format)
+  - Inundation or hazard extent polygon (Polygon vector layer in .shp or .geojson format)
+  - Shelter locations (Point vector layer in .shp or .geojson format)
+  - Optional Digital Elevation Model (Raster layer in preferably in .tiff format) for slope-based walking speed adjustment
 
 - **At-risk building identification**:
   Buildings intersecting the inundation polygon are automatically detected and selected for evacuation analysis.
@@ -69,7 +69,7 @@ Buildings are classified according to evacuation time categories for further spa
 The source code for Building-level Shortest Evacuation Time is openly available at:
 https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin
 
-The plugin is distributed under the MIT License. It is designed to operate within the QGIS environment and can be installed through the QGIS Plugin Manager or manually from the repository. The project documentation, installation instructions, and example usage are provided in the repository README.
+The plugin is distributed under the MIT License. It is designed to operate within the QGIS environment and can be installed through the QGIS Plugin Manager or manually from the repository. The project documentation, installation instructions and example usage are provided in the repository README file.
 
 # Acknowledgements
 
