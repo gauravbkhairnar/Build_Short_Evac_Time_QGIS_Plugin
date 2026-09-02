@@ -21,9 +21,9 @@ authors:
   - name: TM Balakrishnan Nair
     affiliation: 1
 affiliations:
-  - name: Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Hyderabad
+  - name: Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Hyderabad, Telangana, India
     index: 1
-  - name: Department of Climate Change, Indian Institute of Technology, Hyderabad
+  - name: Department of Climate Change, Indian Institute of Technology, Hyderabad, Telangana, India
     index: 2
 date: 2026-02-14
 bibliography: paper.bib
