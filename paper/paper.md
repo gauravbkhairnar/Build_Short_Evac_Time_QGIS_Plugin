@@ -1,5 +1,5 @@
 ---
-title: "Building-level Shortest Evacuation Time: A QGIS Plugin for Time-Based Evacuation Management"
+title: "Deterministic Evacuation Mapping: An Automated QGIS Plugin for Building-Level Analysis"
 tags:
   - QGIS
   - GIS
