@@ -30,7 +30,7 @@ bibliography: paper.bib
 ---
 
 # Summery
-**Build Shortest Evacuation Time** is an open-source QGIS plugin that supports **building-level evacuation planning** for flood and inundation hazards. It automatically identifies buildings located within an inundation zone and computes **shortest evacuation routes** from those at-risk buildings to nearest safe shelters using Open Street Map (OSM) road network data. The plugin aims to assist Local Goverment, GIS users and disaster risk planners in generating rapid evacuation path outputs with minimal input requirements
+**Build_Short_Evac_Time** is an open-source QGIS plugin that supports deterministic **building-level evacuation planning** for flood and inundation hazards. It automatically identifies buildings located within an inundation zone and computes **shortest evacuation routes** from those at-risk buildings to nearest safe shelters using open street map road network data. The plugin aims to assist GIS users and disaster risk planners in generating rapid evacuation path outputs with minimal input requirements 
 
 # Statement of need
 
