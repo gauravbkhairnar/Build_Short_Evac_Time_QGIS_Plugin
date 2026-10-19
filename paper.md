@@ -22,7 +22,7 @@ authors:
     affiliation: 1
 affiliations:
   - name: Indian National Centre for Ocean Information Services, Ministry of Earth Sciences, Hyderabad, Telangana, India
-    index: 1
+    index: 1 
   - name: Department of Climate Change, Indian Institute of Technology, Hyderabad, Telangana, India
     index: 2
 date: 2026-10-01
