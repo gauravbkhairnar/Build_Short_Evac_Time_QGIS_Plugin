@@ -69,6 +69,17 @@ The plugin operates within the QGIS environment and provides an integrated workf
   After successful execution, 2 output layers will generate, first is buildings which are at risk and second is evacuation routes. Each building is assigned to the nearest evacuation shelter and that shelter’s ID and evacuation time is added in that building’s attribute. 
 Buildings are classified according to evacuation time categories for further spatial analysis and visualization.
 
+# Usage and Outputs
+Figure 1 illustrates the plugin interface and its outputs. The user selects the building footprint, evacuation shelter, and inundation extent layers, with an optional digital elevation model (DEM) and clicks Run to execute the analysis. The resulting map displays buildings classified by estimated evacuation time, along with the shortest evacuation routes and their directions toward assigned shelters shown in Figure 2a. The building attribute table provides the corresponding shelter assignment (id_assigned), estimated walking time (Time) and evacuation time class (Class) for each building mentioned in Figure 2b. <br/>
+
+
+<p align="center">
+  <b>Figure 1: Input Parameter<br />
+  <img width="1027" height="667" alt="Run_update" src="https://github.com/user-attachments/assets/367ae94f-220e-43a7-b86c-08913324bc59" />
+</p>
+
+These outputs can be visualized and further analyzed within QGIS to support building-level evacuation planning. Users can also export the generated layers as vector files, such as shapefiles, for permanent storage, integration with other GIS datasets and further spatial analysis using external GIS software. The building-level attributes, including assigned shelter IDs, estimated walking times, and evacuation time classes, enable users to identify areas with longer evacuation times, examine shelter service areas and support the preparation of evacuation plans and disaster management reports.
+
 # Availability
 The source code for Building-level Shortest Evacuation Time is openly available at:
 https://github.com/gauravbkhairnar/Build_Short_Evac_Time_QGIS_Plugin
