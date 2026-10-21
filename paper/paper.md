@@ -14,7 +14,7 @@ authors:
     affiliation: 1
   - name: Ch Patanjali
     affiliation: 1
-  - name: TNC Kartik
+  - name: TNC Karthik
     affiliation: 1
   - name: Sudheer Joseph
     affiliation: 1
