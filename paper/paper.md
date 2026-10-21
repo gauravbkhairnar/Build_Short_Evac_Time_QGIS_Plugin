@@ -70,20 +70,19 @@ The plugin operates within the QGIS environment and provides an integrated workf
 Buildings are classified according to evacuation time categories for further spatial analysis and visualization.
 
 # Usage and Outputs
-Figure 1 illustrates the plugin interface and Figure 2 represents its outputs. The user selects the building footprint as polygon layer, evacuation shelter as point layer and inundation extent layers as polygon layer, with an optional digital elevation model (DEM) in tiff format and clicks Run to execute the analysis. The resulting map displays buildings classified by estimated evacuation time (in minutes), along with the shortest evacuation routes and their directions toward assigned shelters shown in Figure 2a. The building attribute table provides the corresponding shelter assignment (id_assigned), estimated walking time (Time) and evacuation time class (Class) for each building mentioned in Figure 2b. <br/>
+Figure 1 illustrates the plugin interface and Figure 2 represents its outputs. The user selects the building footprint as polygon layer, evacuation shelter as point layer and inundation extent layers as polygon layer, with an optional digital elevation model (DEM) in tiff format and clicks Run to execute the analysis. The resulting map displays buildings classified by estimated evacuation time (in minutes), along with the shortest evacuation routes and their directions toward assigned shelters shown in Figure 2a. The building attribute table provides the corresponding shelter assignment (id_assigned), estimated walking time (Time) and evacuation time class (Class) for each building mentioned in Figure 2b.
 
-<p align="center">
-  <b>Figure 1: Input Parameter<br /></b>
-  <img width="827" height="467" alt="Run_update" src="images/Run.png" />
-</p>
+- **Input Parameters**
+  
+![Input Parameters](images/Run.png)
 
-<p align="center">
-  <b>Figure 2a: Output Layers<br /></b>
-  <img width="710" height="604" alt="Output" src="images/Output.png" /> 
-  <br/>
-  <b>Figure 2b: Attribute Table<br /></b>
-  <img width="369" height="471" alt="attribute_table" src="images/attribute_table.png" />
-</p>
+- **Output Layers**
+  
+![Output Layers](images/Output.png)
+
+- **Attributes**
+  
+![Attribute Table](images/attribute_table.png)
 
 These outputs can be visualized and further analyzed within QGIS to support building-level evacuation planning. Users can also export the generated layers as vector files, such as shapefiles, for permanent storage, integration with other GIS datasets and further spatial analysis using external GIS software. The building-level attributes, including assigned shelter IDs, estimated walking times, and evacuation time classes, enable users to identify areas with longer evacuation times, examine shelter service areas and support the preparation of evacuation plans and disaster management reports.
 
