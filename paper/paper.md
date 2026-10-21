@@ -74,15 +74,15 @@ Figure 1 illustrates the plugin interface and Figure 2 represents its outputs. T
 
 <p align="center">
   <b>Figure 1: Input Parameter<br /></b>
-  <img width="827" height="467" alt="Run_update" src="https://github.com/user-attachments/assets/367ae94f-220e-43a7-b86c-08913324bc59" />
+  <img width="827" height="467" alt="Run_update" src="images/Run.png" />
 </p>
 
 <p align="center">
   <b>Figure 2a: Output Layers<br /></b>
-  <img width="710" height="604" alt="Output" src="https://github.com/user-attachments/assets/2f6fd27f-0808-4eff-b86f-6eb24f0f4307" /> 
+  <img width="710" height="604" alt="Output" src="images/Output.png" /> 
   <br/>
   <b>Figure 2b: Attribute Table<br /></b>
-  <img width="369" height="471" alt="attribute_table" src="https://github.com/user-attachments/assets/9ae06a26-6046-428a-8ee4-11dc02c1c8e5" />
+  <img width="369" height="471" alt="attribute_table" src="images/attribute_table" />
 </p>
 
 These outputs can be visualized and further analyzed within QGIS to support building-level evacuation planning. Users can also export the generated layers as vector files, such as shapefiles, for permanent storage, integration with other GIS datasets and further spatial analysis using external GIS software. The building-level attributes, including assigned shelter IDs, estimated walking times, and evacuation time classes, enable users to identify areas with longer evacuation times, examine shelter service areas and support the preparation of evacuation plans and disaster management reports.
